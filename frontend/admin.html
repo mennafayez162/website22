@@ -112,33 +112,100 @@
     let token = localStorage.getItem('token');
 
     async function login() {
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        const error = document.getElementById('errorMsg');
-        try {
-            const res = await fetch(`${API}/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
-            const data = await res.json();
-            if (data.success) {
-                token = data.data.token;
-                localStorage.setItem('token', token);
-                document.getElementById('loginPage').style.display = 'none';
-                document.getElementById('adminPanel').style.display = 'block';
-                document.getElementById('userName').textContent = data.data.user.username;
-                loadArticles();
-                error.style.display = 'none';
-            } else {
-                error.textContent = data.message || 'بيانات غير صحيحة';
-                error.style.display = 'block';
-            }
-        } catch(e) {
-            error.textContent = '⚠️ خطأ في الاتصال بالسيرفر';
+
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const error = document.getElementById('errorMsg');
+
+    try {
+
+        const res = await fetch(`${API}/auth/login`, {
+
+            method: 'POST',
+
+            headers: {
+                'Content-Type': 'application/json'
+            },
+
+            body: JSON.stringify({
+                username: username,
+                password: password
+            })
+
+        });
+
+
+        console.log("Login Status:", res.status);
+
+
+        const data = await res.json();
+
+
+        console.log("Login Response:", data);
+
+
+
+        if (data.success) {
+
+
+            token = data.data.token;
+
+
+            localStorage.setItem('token', token);
+
+
+
+            document.getElementById('loginPage').style.display = 'none';
+
+            document.getElementById('adminPanel').style.display = 'block';
+
+
+
+            document.getElementById('userName').textContent =
+                data.data.user.username;
+
+
+
+            loadArticles();
+
+
+
+            error.style.display = 'none';
+
+
+
+        } else {
+
+
+            error.textContent =
+                data.message || 'بيانات غير صحيحة';
+
+
             error.style.display = 'block';
+
+
         }
+
+
+
+    } catch (e) {
+
+
+        console.error("LOGIN ERROR:", e);
+
+
+
+        error.textContent =
+            '⚠️ ' + e.message;
+
+
+
+        error.style.display = 'block';
+
+
     }
+
+} 
 
     if (token) {
         fetch(`${API}/auth/me`, {
