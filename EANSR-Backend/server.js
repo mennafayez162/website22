@@ -13,11 +13,24 @@ const app = express();
 
 // ===== CORS =====
 app.use(cors({
-    origin: [
-        'https://eansr.vercel.app',
-        'http://localhost:5500',
-        'http://127.0.0.1:5500'
-    ],
+    origin: function(origin, callback) {
+        const allowed = [
+            'https://eansr.vercel.app',
+            'https://website22.onrender.com',
+            'http://localhost:5000',
+            'http://localhost:5500',
+            'http://127.0.0.1:5500',
+            'http://localhost:8080',
+            'http://127.0.0.1:8080',
+            'http://localhost:3000',
+        ];
+        // Allow file:// (null origin) and no-origin requests (Postman, etc.)
+        if (!origin || allowed.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
