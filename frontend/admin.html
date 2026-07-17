@@ -110,7 +110,7 @@
 <script>
     const API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
         ? 'http://localhost:5000/api'
-        : 'https://website22.onrender.com/api';
+        : '/api';
     let token = localStorage.getItem('token');
 
     async function login() {

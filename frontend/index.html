@@ -190,7 +190,7 @@
     <script>
         const API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? 'http://localhost:5000/api'
-            : 'https://website22.onrender.com/api';
+            : '/api';
 
         // Retry fetch to handle Render free-tier cold starts (server sleeps after inactivity)
         async function fetchWithRetry(url, options = {}, retries = 3, delayMs = 4000) {
