@@ -191,12 +191,30 @@
         const API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? 'http://localhost:5000/api'
             : 'https://website22.onrender.com/api';
-        
+
+        // Retry fetch to handle Render free-tier cold starts (server sleeps after inactivity)
+        async function fetchWithRetry(url, options = {}, retries = 3, delayMs = 4000) {
+            for (let attempt = 1; attempt <= retries; attempt++) {
+                try {
+                    const controller = new AbortController();
+                    const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
+                    const res = await fetch(url, { ...options, signal: controller.signal });
+                    clearTimeout(timeout);
+                    return res;
+                } catch (err) {
+                    if (attempt === retries) throw err;
+                    console.warn(`⏳ محاولة ${attempt} فشلت، إعادة المحاولة بعد ${delayMs / 1000}ث...`);
+                    await new Promise(r => setTimeout(r, delayMs));
+                }
+            }
+        }
+
         async function loadGallery() {
+            const container = document.getElementById('galleryContainer');
+            container.innerHTML = '<p style="text-align:center;color:#999;grid-column:1/-1;padding:40px;">⏳ جاري تحميل الصور...</p>';
             try {
-                const res = await fetch(`${API}/articles?category=gallery`);
+                const res = await fetchWithRetry(`${API}/articles?category=gallery`);
                 const data = await res.json();
-                const container = document.getElementById('galleryContainer');
                 if (data.success && data.data.length > 0) {
                     const images = data.data.filter(a => a.published && a.image);
                     if (images.length === 0) {
@@ -209,9 +227,18 @@
                             <div class="gallery-overlay"><h4>${img.title}</h4><p>${img.summary || ''}</p></div>
                         </div>
                     `).join('');
+                } else {
+                    container.innerHTML = '<p style="text-align:center;color:#999;grid-column:1/-1;padding:40px;">📷 لا توجد صور حالياً</p>';
                 }
             } catch (error) {
-                console.error('Error loading gallery:', error);
+                console.error('❌ خطأ في جلب الصور:', error);
+                container.innerHTML = `<p style="text-align:center;color:#dc3545;grid-column:1/-1;padding:40px;">
+                    ⚠️ حدث خطأ في تحميل الصور
+                    <br><br>
+                    <button onclick="loadGallery()" style="background:#FF6B35;color:white;border:none;padding:10px 24px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:1em;">
+                        🔄 إعادة المحاولة
+                    </button>
+                </p>`;
             }
         }
 

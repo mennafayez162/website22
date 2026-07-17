@@ -139,10 +139,27 @@
             ? 'http://localhost:5000/api'
             : 'https://website22.onrender.com/api';
 
+        async function fetchWithRetry(url, options = {}, retries = 3, delayMs = 4000) {
+            for (let attempt = 1; attempt <= retries; attempt++) {
+                try {
+                    const controller = new AbortController();
+                    const timeout = setTimeout(() => controller.abort(), 15000);
+                    const res = await fetch(url, { ...options, signal: controller.signal });
+                    clearTimeout(timeout);
+                    return res;
+                } catch (err) {
+                    if (attempt === retries) throw err;
+                    console.warn(`⏳ محاولة ${attempt} فشلت، إعادة المحاولة...`);
+                    await new Promise(r => setTimeout(r, delayMs));
+                }
+            }
+        }
+
         async function loadScientificArticles() {
             const container = document.getElementById('articlesContainer');
+            container.innerHTML = '<p class="empty-message">⏳ جاري تحميل المقالات...</p>';
             try {
-                const res = await fetch(`${API}/articles?category=article`);
+                const res = await fetchWithRetry(`${API}/articles?category=article`);
                 const data = await res.json();
                 if (data.success && data.data.length > 0) {
                     const articles = data.data.filter(a => a.published !== false);
@@ -164,7 +181,12 @@
                 }
             } catch (error) {
                 console.error('❌ خطأ:', error);
-                container.innerHTML = '<p class="empty-message" style="color:#dc3545;">⚠️ حدث خطأ في تحميل المحتوى</p>';
+                container.innerHTML = `<div class="empty-message" style="color:#dc3545;">
+                    ⚠️ حدث خطأ في تحميل المحتوى<br><br>
+                    <button onclick="loadScientificArticles()" style="background:#FF6B35;color:white;border:none;padding:10px 24px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:1em;">
+                        🔄 إعادة المحاولة
+                    </button>
+                </div>`;
             }
         }
 
