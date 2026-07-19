@@ -246,8 +246,8 @@
                         <td>${getCategory(a.category)}</td>
                         <td><span class="status-badge ${a.published ? 'status-published' : 'status-draft'}">${a.published ? '✅ منشور' : '📝 مسودة'}</span></td>
                         <td>
-                            <button class="btn-edit" onclick="editArticle('${a._id}')">✏️</button>
-                            <button class="btn-delete" onclick="deleteArticle('${a._id}')">🗑️</button>
+                            <button class="btn-edit" onclick="editArticle('${a.id}')">✏️</button>
+                            <button class="btn-delete" onclick="deleteArticle('${a.id}')">🗑️</button>
                         </td>
                     </tr>
                 `).join('');
@@ -279,7 +279,7 @@
             if (data.success) {
                 const a = data.data;
                 document.getElementById('modalTitle').textContent = '✏️ تعديل المقالة';
-                document.getElementById('articleId').value = a._id;
+                document.getElementById('articleId').value = a.id;
                 document.getElementById('formTitle').value = a.title;
                 document.getElementById('formSummary').value = a.summary || '';
                 document.getElementById('formContent').value = a.content;

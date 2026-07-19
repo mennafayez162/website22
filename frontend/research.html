@@ -171,7 +171,7 @@
                             <span class="category">مراجعة أبحاث</span>
                             <h3>${article.title}</h3>
                             <p>${article.summary || article.content?.substring(0, 120) + '...' || 'لا يوجد ملخص'}</p>
-                            <span class="date">📅 ${new Date(article.createdAt).toLocaleDateString('ar-EG')}</span>
+                            <span class="date">📅 ${new Date(article.created_at).toLocaleDateString('ar-EG')}</span>
                         </div>
                     `).join('');
                 } else {

@@ -3,11 +3,10 @@ const router = express.Router();
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
-// ===== تسجيل الدخول =====
 router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
-        
+
         if (!username || !password) {
             return res.status(400).json({
                 success: false,
@@ -23,7 +22,7 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        const isMatch = await user.comparePassword(password);
+        const isMatch = await User.comparePassword(password, user.password);
         if (!isMatch) {
             return res.status(401).json({
                 success: false,
@@ -31,8 +30,10 @@ router.post('/login', async (req, res) => {
             });
         }
 
+        await User.updateLastLogin(user.id);
+
         const token = jwt.sign(
-            { id: user._id, username: user.username, role: user.role },
+            { id: user.id, username: user.username, role: user.role },
             process.env.JWT_SECRET || 'eansr_super_secret_key_2026',
             { expiresIn: '7d' }
         );
@@ -42,7 +43,7 @@ router.post('/login', async (req, res) => {
             data: {
                 token,
                 user: {
-                    id: user._id,
+                    id: user.id,
                     username: user.username,
                     role: user.role,
                     name: user.name || user.username
@@ -51,7 +52,7 @@ router.post('/login', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Login error:', error);
+        console.error('Login error:', error);
         res.status(500).json({
             success: false,
             message: error.message
@@ -59,7 +60,6 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// ===== إنشاء مستخدم أدمن =====
 router.post('/seed-admin', async (req, res) => {
     try {
         const adminExists = await User.findOne({ username: 'admin' });
@@ -89,7 +89,7 @@ router.post('/seed-admin', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Seed error:', error);
+        console.error('Seed error:', error);
         res.status(500).json({
             success: false,
             message: error.message
@@ -97,7 +97,6 @@ router.post('/seed-admin', async (req, res) => {
     }
 });
 
-// ===== جلب بيانات المستخدم =====
 router.get('/me', async (req, res) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];
@@ -108,7 +107,7 @@ router.get('/me', async (req, res) => {
             });
         }
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'eansr_super_secret_key_2026');
-        const user = await User.findById(decoded.id).select('-password');
+        const user = await User.findById(decoded.id);
         if (!user) {
             return res.status(401).json({
                 success: false,
