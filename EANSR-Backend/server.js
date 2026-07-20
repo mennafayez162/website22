@@ -39,6 +39,7 @@ app.use(express.json());
 // ===== Routes =====
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/articles', require('./routes/articleRoutes'));
+app.use('/api/upload', require('./routes/uploadRoutes'));
 
 // ===== Home Route =====
 app.get('/', (req, res) => {

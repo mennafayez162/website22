@@ -31,9 +31,9 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', auth, async (req, res) => {
     try {
-        const { title, content, summary, category, image, published } = req.body;
+        const { title, content, summary, category, image, pdf, published } = req.body;
         const article = await Article.create({
-            title, content, summary, category, image,
+            title, content, summary, category, image, pdf,
             published: published !== undefined ? published : true,
             author: req.user.id,
             authorName: req.user.name || req.user.username
@@ -51,8 +51,8 @@ router.put('/:id', auth, async (req, res) => {
         if (article.author !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({ success: false, message: 'Unauthorized' });
         }
-        const { title, content, summary, category, image, published } = req.body;
-        const updated = await Article.update(req.params.id, { title, content, summary, category, image, published });
+        const { title, content, summary, category, image, pdf, published } = req.body;
+        const updated = await Article.update(req.params.id, { title, content, summary, category, image, pdf, published });
         res.json({ success: true, data: updated });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });

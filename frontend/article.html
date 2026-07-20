@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EANSR - المقالة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .page-header {
+            background: linear-gradient(135deg, #0A2D56, #1a4b7a);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+        .page-header h1 { font-size: 2.5em; font-weight: 900; max-width: 800px; margin: 0 auto; }
+        .page-header h1 span { color: #FF6B35; }
+        .article-meta { display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-top:15px; opacity:0.8; font-size:0.95em; }
+        .article-meta span { display:flex; align-items:center; gap:5px; }
+        .article-body {
+            padding: 40px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 2;
+            font-size: 1.1em;
+            color: #333;
+        }
+        .article-body img {
+            max-width: 100%;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        .article-body h2 { color: #0A2D56; margin: 30px 0 15px; font-size: 1.5em; }
+        .article-body h3 { color: #0A2D56; margin: 25px 0 10px; }
+        .article-body p { margin-bottom: 15px; }
+        .article-body ul, .article-body ol { padding-right: 25px; margin-bottom: 15px; }
+        .article-body blockquote {
+            border-right: 4px solid #FF6B35;
+            background: #f8f9fa;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            color: #555;
+        }
+        .pdf-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #dc3545;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            margin: 20px 0;
+            transition: 0.3s;
+        }
+        .pdf-download:hover { background: #c82333; transform: translateY(-2px); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #FF6B35;
+            font-weight: 700;
+            margin-bottom: 30px;
+            transition: 0.3s;
+        }
+        .back-link:hover { gap: 15px; }
+        .loading { text-align:center; padding:80px 20px; color:#999; font-size:1.2em; }
+        .header {
+            background: #0A2D56;
+            color: white;
+            padding: 12px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+        }
+        .header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .logo { display: flex; align-items: center; gap: 12px; }
+        .logo img { height: 50px; width: auto; border-radius: 8px; }
+        .logo-text h1 { font-weight: 900; font-size: 1.6em; margin: 0; }
+        .logo-text p { font-size: 0.6em; opacity: 0.85; margin: 0; }
+        .footer { background: #0A2D56; color: white; padding: 30px 20px; text-align: center; }
+        .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; font-size: 0.9em; opacity: 0.7; }
+        .developer-name { color: #FF6B35; font-weight: 700; }
+        @media (max-width: 768px) { .page-header h1 { font-size: 1.6em; } .article-body { font-size: 1em; } }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <img src="logo.png" alt="شعار الجمعية">
+                <div class="logo-text">
+                    <h1>EANSR</h1>
+                    <p>الجمعية المصرية للتأهيل العصبي والعمود الفقري</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div id="articleContainer">
+        <div class="loading" id="loadingMsg">جاري تحميل المقالة...</div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>جميع الحقوق محفوظة &copy; 2026 EANSR</p>
+                <p>تم التطوير بواسطة <span class="developer-name">Menna Fayez</span></p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:5000/api'
+            : '/api';
+
+        function getCategoryLabel(cat) {
+            const map = { 'research':'مراجعة ابحاث', 'article':'مقالة علمية', 'journal':'مجلة EANSR', 'news':'اخبار', 'gallery':'معرض الصور' };
+            return map[cat] || cat;
+        }
+
+        async function loadArticle() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            if (!id) {
+                document.getElementById('articleContainer').innerHTML = '<div class="loading" style="color:#dc3545;">لم يتم العثور على المقالة</div>';
+                return;
+            }
+            try {
+                const res = await fetch(`${API}/articles/${id}`);
+                const data = await res.json();
+                if (!data.success || !data.data) {
+                    document.getElementById('articleContainer').innerHTML = '<div class="loading" style="color:#dc3545;">لم يتم العثور على المقالة</div>';
+                    return;
+                }
+                const a = data.data;
+                document.title = a.title + ' - EANSR';
+                document.getElementById('articleContainer').innerHTML = `
+                    <section class="page-header">
+                        <div class="container">
+                            <span style="display:inline-block;background:#FF6B35;padding:4px 16px;border-radius:20px;font-size:0.8em;font-weight:600;margin-bottom:15px;">${getCategoryLabel(a.category)}</span>
+                            <h1>${a.title}</h1>
+                            <div class="article-meta">
+                                <span><i class="fas fa-user"></i> ${a.author_name || 'EANSR'}</span>
+                                <span><i class="fas fa-calendar"></i> ${new Date(a.created_at).toLocaleDateString('ar-EG', {year:'numeric',month:'long',day:'numeric'})}</span>
+                                <span><i class="fas fa-eye"></i> ${a.views || 0} مشاهدة</span>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="article-body" style="max-width:800px;margin:0 auto;padding:40px 20px;">
+                        <a href="javascript:history.back()" class="back-link"><i class="fas fa-arrow-right"></i> العودة</a>
+                        ${a.image ? `<img src="${a.image}" alt="${a.title}" style="width:100%;border-radius:12px;margin-bottom:25px;">` : ''}
+                        ${a.pdf ? `<a href="${a.pdf}" target="_blank" class="pdf-download"><i class="fas fa-file-pdf"></i> تحميل ملف PDF</a>` : ''}
+                        <div style="line-height:2;font-size:1.1em;color:#333;">${a.content}</div>
+                        ${a.pdf ? `
+                            <div style="margin-top:30px;border:2px solid #eee;border-radius:12px;overflow:hidden;">
+                                <iframe src="${a.pdf}" style="width:100%;height:600px;border:none;" loading="lazy"></iframe>
+                            </div>
+                        ` : ''}
+                    </section>
+                `;
+            } catch(e) {
+                document.getElementById('articleContainer').innerHTML = '<div class="loading" style="color:#dc3545;">خطأ في تحميل المقالة</div>';
+            }
+        }
+
+        loadArticle();
+    </script>
+</body>
+</html>

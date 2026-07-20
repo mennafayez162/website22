@@ -3,7 +3,7 @@ const supabase = require('../config/supabase');
 const TABLE = 'articles';
 
 const Article = {
-    async create({ title, content, summary = '', category = 'article', image = '', author, authorName = 'EANSR', published = true, featured = false, tags = [] }) {
+    async create({ title, content, summary = '', category = 'article', image = '', pdf = '', author, authorName = 'EANSR', published = true, featured = false, tags = [] }) {
         const { data, error } = await supabase
             .from(TABLE)
             .insert({
@@ -12,6 +12,7 @@ const Article = {
                 summary,
                 category,
                 image,
+                pdf,
                 author,
                 author_name: authorName,
                 published,
@@ -90,6 +91,7 @@ const Article = {
         if (updates.summary !== undefined) dbUpdates.summary = updates.summary;
         if (updates.category !== undefined) dbUpdates.category = updates.category;
         if (updates.image !== undefined) dbUpdates.image = updates.image;
+        if (updates.pdf !== undefined) dbUpdates.pdf = updates.pdf;
         if (updates.published !== undefined) dbUpdates.published = updates.published;
         if (updates.featured !== undefined) dbUpdates.featured = updates.featured;
         dbUpdates.updated_at = new Date().toISOString();

@@ -8,83 +8,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
-        .page-header {
-            background: linear-gradient(135deg, #0A2D56, #1a4b7a);
-            color: white;
-            padding: 60px 20px;
-            text-align: center;
-        }
+        .page-header { background: linear-gradient(135deg, #0A2D56, #1a4b7a); color: white; padding: 60px 20px; text-align: center; }
         .page-header h1 { font-size: 2.5em; font-weight: 900; }
         .page-header h1 span { color: #FF6B35; }
         .page-content { padding: 60px 20px; max-width: 1000px; margin: 0 auto; }
-        .articles-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-        }
-        .article-card {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            border-right: 4px solid #FF6B35;
-            transition: 0.3s;
-        }
-        .article-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-        }
-        .article-card img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            background: #f0f2f5;
-        }
+        .articles-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
+        .article-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-right: 4px solid #FF6B35; transition: 0.3s; cursor: pointer; text-decoration: none; color: inherit; display: block; }
+        .article-card:hover { transform: translateY(-5px); box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
+        .article-card img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; margin-bottom: 12px; background: #f0f2f5; }
         .article-card h3 { color: #0A2D56; margin-bottom: 10px; }
-        .article-card .category {
-            display: inline-block;
-            background: #FF6B35;
-            color: white;
-            padding: 2px 12px;
-            border-radius: 20px;
-            font-size: 0.7em;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
+        .article-card .category { display: inline-block; background: #FF6B35; color: white; padding: 2px 12px; border-radius: 20px; font-size: 0.7em; font-weight: 600; margin-bottom: 10px; }
         .article-card p { color: #666; font-size: 0.95em; line-height: 1.8; }
         .article-card .date { color: #999; font-size: 0.8em; margin-top: 10px; display: block; }
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: #FF6B35;
-            font-weight: 700;
-            margin-bottom: 30px;
-            transition: 0.3s;
-        }
+        .article-card .read-more { display: inline-flex; align-items: center; gap: 6px; color: #FF6B35; font-weight: 700; margin-top: 12px; }
+        .back-link { display: inline-flex; align-items: center; gap: 8px; color: #FF6B35; font-weight: 700; margin-bottom: 30px; transition: 0.3s; }
         .back-link:hover { gap: 15px; }
         .empty-message { text-align: center; color: #999; padding: 40px; grid-column: 1/-1; }
-        .header {
-            background: #0A2D56;
-            color: white;
-            padding: 12px 0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.3);
-        }
-        .header .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
+        .header { background: #0A2D56; color: white; padding: 12px 0; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 20px rgba(0,0,0,0.3); }
+        .header .container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
         .logo { display: flex; align-items: center; gap: 12px; }
         .logo img { height: 50px; width: auto; border-radius: 8px; }
         .logo-text h1 { font-weight: 900; font-size: 1.6em; margin: 0; }
@@ -120,7 +61,7 @@
         <div class="container">
             <a href="index.html" class="back-link"><i class="fas fa-arrow-right"></i> العودة للرئيسية</a>
             <div id="articlesContainer" class="articles-grid">
-                <p class="empty-message">⏳ جاري تحميل المقالات...</p>
+                <p class="empty-message">جاري تحميل المقالات...</p>
             </div>
         </div>
     </section>
@@ -128,7 +69,7 @@
     <footer class="footer">
         <div class="container">
             <div class="footer-bottom">
-                <p>جميع الحقوق محفوظة © 2026 EANSR</p>
+                <p>جميع الحقوق محفوظة &copy; 2026 EANSR</p>
                 <p>تم التطوير بواسطة <span class="developer-name">Menna Fayez</span></p>
             </div>
         </div>
@@ -149,7 +90,6 @@
                     return res;
                 } catch (err) {
                     if (attempt === retries) throw err;
-                    console.warn(`⏳ محاولة ${attempt} فشلت، إعادة المحاولة...`);
                     await new Promise(r => setTimeout(r, delayMs));
                 }
             }
@@ -157,41 +97,38 @@
 
         async function loadScientificArticles() {
             const container = document.getElementById('articlesContainer');
-            container.innerHTML = '<p class="empty-message">⏳ جاري تحميل المقالات...</p>';
+            container.innerHTML = '<p class="empty-message">جاري تحميل المقالات...</p>';
             try {
                 const res = await fetchWithRetry(`${API}/articles?category=article`);
                 const data = await res.json();
                 if (data.success && data.data.length > 0) {
                     const articles = data.data.filter(a => a.published !== false);
                     if (articles.length === 0) {
-                        container.innerHTML = '<p class="empty-message">📭 لا توجد مقالات علمية حالياً</p>';
+                        container.innerHTML = '<p class="empty-message">لا توجد مقالات علمية حالياً</p>';
                         return;
                     }
                     container.innerHTML = articles.map(article => `
-                        <div class="article-card">
+                        <a href="article.html?id=${article.id}" class="article-card">
                             ${article.image ? `<img src="${article.image}" alt="${article.title}">` : ''}
                             <span class="category">مقالة علمية</span>
                             <h3>${article.title}</h3>
-                            <p>${article.summary || article.content?.substring(0, 120) + '...' || 'لا يوجد ملخص'}</p>
-                            <span class="date">📅 ${new Date(article.created_at).toLocaleDateString('ar-EG')}</span>
-                        </div>
+                            <p>${article.summary || (article.content ? article.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...' : 'لا يوجد ملخص')}</p>
+                            <span class="date">${new Date(article.created_at).toLocaleDateString('ar-EG', {year:'numeric',month:'long',day:'numeric'})}</span>
+                            <span class="read-more">اقرأ المزيد <i class="fas fa-arrow-left"></i></span>
+                        </a>
                     `).join('');
                 } else {
-                    container.innerHTML = '<p class="empty-message">📭 لا توجد مقالات علمية حالياً</p>';
+                    container.innerHTML = '<p class="empty-message">لا توجد مقالات علمية حالياً</p>';
                 }
             } catch (error) {
-                console.error('❌ خطأ:', error);
                 container.innerHTML = `<div class="empty-message" style="color:#dc3545;">
-                    ⚠️ حدث خطأ في تحميل المحتوى<br><br>
-                    <button onclick="loadScientificArticles()" style="background:#FF6B35;color:white;border:none;padding:10px 24px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:1em;">
-                        🔄 إعادة المحاولة
-                    </button>
+                    خطأ في تحميل المحتوى<br><br>
+                    <button onclick="loadScientificArticles()" style="background:#FF6B35;color:white;border:none;padding:10px 24px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:1em;">اعادة المحاولة</button>
                 </div>`;
             }
         }
 
         document.addEventListener('DOMContentLoaded', loadScientificArticles);
     </script>
-
 </body>
 </html>

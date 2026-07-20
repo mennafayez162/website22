@@ -36,7 +36,7 @@
         .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:999; }
         .modal-content { background:white; padding:30px; border-radius:12px; max-width:600px; width:90%; max-height:90vh; overflow-y:auto; }
         .modal-content input,.modal-content textarea,.modal-content select { width:100%; padding:10px; margin-bottom:15px; border:2px solid #ddd; border-radius:8px; font-size:16px; font-family:inherit; }
-        .modal-content textarea { height:150px; resize:vertical; }
+        .modal-content textarea { height:200px; resize:vertical; }
         .modal-content label { display:block; font-weight:600; margin-bottom:5px; }
         .modal-actions { display:flex; gap:10px; margin-top:15px; }
         .btn-save { background:#28a745; color:white; border:none; padding:10px 30px; border-radius:8px; cursor:pointer; font-weight:bold; }
@@ -44,6 +44,12 @@
         .status-badge { padding:4px 12px; border-radius:20px; font-size:0.8em; font-weight:600; }
         .status-published { background:#d4edda; color:#155724; }
         .status-draft { background:#fff3cd; color:#856404; }
+        .upload-area { border:2px dashed #ddd; border-radius:8px; padding:15px; text-align:center; cursor:pointer; margin-bottom:15px; transition:0.3s; }
+        .upload-area:hover { border-color:#FF6B35; background:#fff5f0; }
+        .upload-area input { display:none; }
+        .upload-area .preview { max-width:100%; max-height:150px; border-radius:8px; margin-top:10px; }
+        .upload-area .file-name { color:#28a745; font-weight:600; margin-top:5px; }
+        .upload-label { font-weight:600; display:block; margin-bottom:5px; }
         @media(max-width:768px){ .admin-header { flex-direction:column; gap:10px; } table{font-size:0.8em;} }
     </style>
 </head>
@@ -51,9 +57,9 @@
 
 <div id="loginPage" class="login-page">
     <div class="login-box">
-        <h2>🔐 EANSR</h2>
+        <h2>EANSR</h2>
         <p>لوحة التحكم</p>
-        <div id="errorMsg" class="error-msg">⚠️ بيانات غير صحيحة</div>
+        <div id="errorMsg" class="error-msg">بيانات غير صحيحة</div>
         <input type="text" id="username" placeholder="اسم المستخدم">
         <input type="password" id="password" placeholder="كلمة المرور">
         <button onclick="login()">تسجيل الدخول</button>
@@ -62,10 +68,10 @@
 
 <div id="adminPanel" class="admin-panel">
     <div class="admin-header">
-        <h2>📊 لوحة التحكم</h2>
+        <h2>لوحة التحكم</h2>
         <div>
             <span id="userName" style="margin-left:15px;">admin</span>
-            <button onclick="logout()">🚪 تسجيل الخروج</button>
+            <button onclick="logout()">تسجيل الخروج</button>
         </div>
     </div>
     <div class="stats">
@@ -74,11 +80,11 @@
     </div>
     <div class="articles-box">
         <div class="top-bar">
-            <h3>📝 المقالات</h3>
-            <button class="btn-add" onclick="openAddModal()">➕ إضافة مقالة</button>
+            <h3>المقالات</h3>
+            <button class="btn-add" onclick="openAddModal()">اضافة مقالة</button>
         </div>
         <table>
-            <thead><tr><th>العنوان</th><th>القسم</th><th>الحالة</th><th>الإجراءات</th></tr></thead>
+            <thead><tr><th>العنوان</th><th>القسم</th><th>الحالة</th><th>الاجراءات</th></tr></thead>
             <tbody id="articlesTable"><tr><td colspan="4" style="text-align:center;color:#999;">جاري التحميل...</td></tr></tbody>
         </table>
     </div>
@@ -86,23 +92,42 @@
 
 <div id="modal" class="modal">
     <div class="modal-content">
-        <h3 id="modalTitle">إضافة مقالة</h3>
+        <h3 id="modalTitle">اضافة مقالة</h3>
         <input type="hidden" id="articleId">
         <input type="text" id="formTitle" placeholder="عنوان المقالة">
-        <input type="text" id="formSummary" placeholder="ملخص قصير">
+        <input type="text" id="formSummary" placeholder="نبذة قصيرة عن المقالة">
         <select id="formCategory">
             <option value="article">مقالة علمية</option>
-            <option value="research">مراجعة أبحاث</option>
+            <option value="research">مراجعة ابحاث</option>
             <option value="journal">مجلة EANSR</option>
-            <option value="news">أخبار</option>
+            <option value="news">اخبار</option>
             <option value="gallery">معرض الصور</option>
         </select>
-        <textarea id="formContent" placeholder="محتوى المقالة..."></textarea>
-        <input type="text" id="formImage" placeholder="رابط الصورة (اختياري)">
+        <textarea id="formContent" placeholder="محتوى المقالة (يدعم HTML)..." style="min-height:250px;"></textarea>
+
+        <span class="upload-label">صورة المقالة</span>
+        <div class="upload-area" onclick="document.getElementById('imageFile').click()">
+            <i class="fas fa-cloud-upload-alt" style="font-size:2em;color:#FF6B35;"></i>
+            <p>اضغط لاختيار صورة من جهازك</p>
+            <input type="file" id="imageFile" accept="image/*" onchange="previewImage(this)">
+            <img id="imagePreview" class="preview" style="display:none;">
+            <div id="imageName" class="file-name"></div>
+        </div>
+        <input type="hidden" id="formImage">
+
+        <span class="upload-label">ملف PDF (اختياري)</span>
+        <div class="upload-area" onclick="document.getElementById('pdfFile').click()">
+            <i class="fas fa-file-pdf" style="font-size:2em;color:#dc3545;"></i>
+            <p>اضغط لاختيار ملف PDF</p>
+            <input type="file" id="pdfFile" accept=".pdf" onchange="previewPdf(this)">
+            <div id="pdfName" class="file-name"></div>
+        </div>
+        <input type="hidden" id="formPdf">
+
         <label><input type="checkbox" id="formPublished" checked> منشور</label>
         <div class="modal-actions">
-            <button class="btn-save" onclick="saveArticle()">💾 حفظ</button>
-            <button class="btn-cancel" onclick="closeModal()">إلغاء</button>
+            <button class="btn-save" onclick="saveArticle()">حفظ</button>
+            <button class="btn-cancel" onclick="closeModal()">الغاء</button>
         </div>
     </div>
 </div>
@@ -113,101 +138,62 @@
         : '/api';
     let token = localStorage.getItem('token');
 
-    async function login() {
-
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value.trim();
-    const error = document.getElementById('errorMsg');
-
-    try {
-
-        const res = await fetch(`${API}/auth/login`, {
-
+    async function uploadFile(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch(`${API}/upload`, {
             method: 'POST',
-
-            headers: {
-                'Content-Type': 'application/json'
-            },
-
-            body: JSON.stringify({
-                username: username,
-                password: password
-            })
-
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
         });
-
-
-        console.log("Login Status:", res.status);
-
-
         const data = await res.json();
-
-
-        console.log("Login Response:", data);
-
-
-
-        if (data.success) {
-
-
-            token = data.data.token;
-
-
-            localStorage.setItem('token', token);
-
-
-
-            document.getElementById('loginPage').style.display = 'none';
-
-            document.getElementById('adminPanel').style.display = 'block';
-
-
-
-            document.getElementById('userName').textContent =
-                data.data.user.username;
-
-
-
-            loadArticles();
-
-
-
-            error.style.display = 'none';
-
-
-
-        } else {
-
-
-            error.textContent =
-                data.message || 'بيانات غير صحيحة';
-
-
-            error.style.display = 'block';
-
-
-        }
-
-
-
-    } catch (e) {
-
-
-        console.error("LOGIN ERROR:", e);
-
-
-
-        error.textContent =
-            '⚠️ ' + e.message;
-
-
-
-        error.style.display = 'block';
-
-
+        if (!data.success) throw new Error(data.message);
+        return data.data.url;
     }
 
-} 
+    function previewImage(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const preview = document.getElementById('imagePreview');
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+        document.getElementById('imageName').textContent = file.name;
+    }
+
+    function previewPdf(input) {
+        const file = input.files[0];
+        if (!file) return;
+        document.getElementById('pdfName').textContent = file.name;
+    }
+
+    async function login() {
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const error = document.getElementById('errorMsg');
+        try {
+            const res = await fetch(`${API}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+            if (data.success) {
+                token = data.data.token;
+                localStorage.setItem('token', token);
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('adminPanel').style.display = 'block';
+                document.getElementById('userName').textContent = data.data.user.username;
+                loadArticles();
+                error.style.display = 'none';
+            } else {
+                error.textContent = data.message || 'بيانات غير صحيحة';
+                error.style.display = 'block';
+            }
+        } catch (e) {
+            error.textContent = e.message;
+            error.style.display = 'block';
+        }
+    }
 
     if (token) {
         fetch(`${API}/auth/me`, {
@@ -244,10 +230,10 @@
                     <tr>
                         <td><strong>${a.title}</strong></td>
                         <td>${getCategory(a.category)}</td>
-                        <td><span class="status-badge ${a.published ? 'status-published' : 'status-draft'}">${a.published ? '✅ منشور' : '📝 مسودة'}</span></td>
+                        <td><span class="status-badge ${a.published ? 'status-published' : 'status-draft'}">${a.published ? 'منشور' : 'مسودة'}</span></td>
                         <td>
-                            <button class="btn-edit" onclick="editArticle('${a.id}')">✏️</button>
-                            <button class="btn-delete" onclick="deleteArticle('${a.id}')">🗑️</button>
+                            <button class="btn-edit" onclick="editArticle('${a.id}')">تعديل</button>
+                            <button class="btn-delete" onclick="deleteArticle('${a.id}')">حذف</button>
                         </td>
                     </tr>
                 `).join('');
@@ -256,19 +242,25 @@
     }
 
     function getCategory(cat) {
-        const map = { 'research':'مراجعة أبحاث', 'article':'مقالة علمية', 'journal':'مجلة EANSR', 'news':'أخبار', 'gallery':'معرض الصور' };
+        const map = { 'research':'مراجعة ابحاث', 'article':'مقالة علمية', 'journal':'مجلة EANSR', 'news':'اخبار', 'gallery':'معرض الصور' };
         return map[cat] || cat;
     }
 
     function openAddModal() {
-        document.getElementById('modalTitle').textContent = '➕ إضافة مقالة جديدة';
+        document.getElementById('modalTitle').textContent = 'اضافة مقالة جديدة';
         document.getElementById('articleId').value = '';
         document.getElementById('formTitle').value = '';
         document.getElementById('formSummary').value = '';
         document.getElementById('formContent').value = '';
         document.getElementById('formImage').value = '';
+        document.getElementById('formPdf').value = '';
         document.getElementById('formCategory').value = 'article';
         document.getElementById('formPublished').checked = true;
+        document.getElementById('imagePreview').style.display = 'none';
+        document.getElementById('imageName').textContent = '';
+        document.getElementById('pdfName').textContent = '';
+        document.getElementById('imageFile').value = '';
+        document.getElementById('pdfFile').value = '';
         document.getElementById('modal').style.display = 'flex';
     }
 
@@ -278,17 +270,28 @@
             const data = await res.json();
             if (data.success) {
                 const a = data.data;
-                document.getElementById('modalTitle').textContent = '✏️ تعديل المقالة';
+                document.getElementById('modalTitle').textContent = 'تعديل المقالة';
                 document.getElementById('articleId').value = a.id;
                 document.getElementById('formTitle').value = a.title;
                 document.getElementById('formSummary').value = a.summary || '';
                 document.getElementById('formContent').value = a.content;
                 document.getElementById('formImage').value = a.image || '';
+                document.getElementById('formPdf').value = a.pdf || '';
                 document.getElementById('formCategory').value = a.category || 'article';
                 document.getElementById('formPublished').checked = a.published !== false;
+                document.getElementById('imageFile').value = '';
+                document.getElementById('pdfFile').value = '';
+                document.getElementById('pdfName').textContent = a.pdf ? 'ملف PDF مرفق' : '';
+                document.getElementById('imageName').textContent = '';
+                if (a.image) {
+                    document.getElementById('imagePreview').src = a.image;
+                    document.getElementById('imagePreview').style.display = 'block';
+                } else {
+                    document.getElementById('imagePreview').style.display = 'none';
+                }
                 document.getElementById('modal').style.display = 'flex';
             }
-        } catch(e) { alert('❌ خطأ في تحميل المقالة'); }
+        } catch(e) { alert('خطأ في تحميل المقالة'); }
     }
 
     async function saveArticle() {
@@ -298,13 +301,25 @@
             category: document.getElementById('formCategory').value,
             content: document.getElementById('formContent').value,
             image: document.getElementById('formImage').value,
+            pdf: document.getElementById('formPdf').value,
             published: document.getElementById('formPublished').checked
         };
         if (!data.title || !data.content) {
-            alert('⚠️ الرجاء ملء العنوان والمحتوى');
+            alert('الرجاء ملء العنوان والمحتوى');
             return;
         }
+
+        const imageFile = document.getElementById('imageFile').files[0];
+        const pdfFile = document.getElementById('pdfFile').files[0];
+
         try {
+            if (imageFile) {
+                data.image = await uploadFile(imageFile);
+            }
+            if (pdfFile) {
+                data.pdf = await uploadFile(pdfFile);
+            }
+
             const id = document.getElementById('articleId').value;
             const url = id ? `${API}/articles/${id}` : `${API}/articles`;
             const method = id ? 'PUT' : 'POST';
@@ -317,24 +332,24 @@
             if (result.success) {
                 closeModal();
                 loadArticles();
-                alert(id ? '✅ تم التعديل' : '✅ تم الإضافة');
+                alert(id ? 'تم التعديل' : 'تم الاضافة');
             } else {
-                alert('❌ ' + result.message);
+                alert(result.message);
             }
-        } catch(e) { alert('❌ خطأ في الحفظ'); }
+        } catch(e) { alert('خطأ في الحفظ: ' + e.message); }
     }
 
     async function deleteArticle(id) {
-        if (!confirm('هل أنت متأكد؟')) return;
+        if (!confirm('هل انت متأكد من الحذف؟')) return;
         try {
             const res = await fetch(`${API}/articles/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
-            if (data.success) { loadArticles(); alert('✅ تم الحذف'); }
-            else { alert('❌ ' + data.message); }
-        } catch(e) { alert('❌ خطأ في الحذف'); }
+            if (data.success) { loadArticles(); alert('تم الحذف'); }
+            else { alert(data.message); }
+        } catch(e) { alert('خطأ في الحذف'); }
     }
 
     function closeModal() {

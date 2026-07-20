@@ -222,9 +222,14 @@
                         return;
                     }
                     container.innerHTML = images.map(img => `
-                        <div class="gallery-item" onclick="openLightbox('${img.image}')">
-                            <img src="${img.image}" alt="${img.title}" loading="lazy">
-                            <div class="gallery-overlay"><h4>${img.title}</h4><p>${img.summary || ''}</p></div>
+                        <div class="gallery-item">
+                            <img src="${img.image}" alt="${img.title}" loading="lazy" onclick="event.stopPropagation();openLightbox('${img.image}')">
+                            <div class="gallery-overlay"><h4>${img.title}</h4><p>${img.summary || ''}</p>
+                                <div style="display:flex;gap:10px;margin-top:8px;">
+                                    <a href="article.html?id=${img.id}" onclick="event.stopPropagation()" style="background:#FF6B35;color:white;padding:4px 14px;border-radius:20px;font-size:0.8em;text-decoration:none;font-weight:700;">تفاصيل</a>
+                                    <button onclick="event.stopPropagation();openLightbox('${img.image}')" style="background:rgba(255,255,255,0.2);color:white;padding:4px 14px;border-radius:20px;font-size:0.8em;border:1px solid rgba(255,255,255,0.4);cursor:pointer;">تكبير</button>
+                                </div>
+                            </div>
                         </div>
                     `).join('');
                 } else {
